@@ -1,13 +1,12 @@
 #!/usr/bin/env Rscript
 
 required_packages <- c(
-  "dplyr", "readr", "lubridate", "broom", "ggplot2",
-  "openxlsx", "MASS", "mgcv", "statmod"
+  "dplyr", "lubridate", "broom", "ggplot2",
+  "MASS", "mgcv", "statmod"
 )
 
 optional_packages <- c(
-  "CASdatasets", "tweedie", "rsample", "yardstick",
-  "arrow", "duckdb", "quarto"
+  "openxlsx", "tweedie", "rsample", "yardstick", "arrow", "duckdb", "quarto"
 )
 
 this_script_path <- function() {
@@ -24,17 +23,19 @@ this_script_path <- function() {
 }
 
 check_packages <- function(required = required_packages, optional = optional_packages) {
-  installed <- rownames(utils::installed.packages())
+  is_available <- function(pkg) {
+    requireNamespace(pkg, quietly = TRUE)
+  }
   list(
     r_version = paste(R.version$major, R.version$minor, sep = "."),
     required = data.frame(
       package = required,
-      installed = required %in% installed,
+      installed = unname(vapply(required, is_available, logical(1))),
       stringsAsFactors = FALSE
     ),
     optional = data.frame(
       package = optional,
-      installed = optional %in% installed,
+      installed = unname(vapply(optional, is_available, logical(1))),
       stringsAsFactors = FALSE
     )
   )
@@ -82,5 +83,5 @@ run_preflight <- function(path = "preflight_report.txt", stop_on_missing = FALSE
 }
 
 if (sys.nframe() == 0 && !interactive()) {
-  run_preflight()
+  invisible(run_preflight())
 }

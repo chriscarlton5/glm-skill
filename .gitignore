@@ -1,5 +1,5 @@
 preflight_report.txt
-glm_demo_output/
+glm_validation_output/
 outputs/
 artifacts/
 *.RData

@@ -52,6 +52,8 @@ glm(
 
 ## Data QA
 
+Load user files with an explicit, reproducible step. `load_modeling_data()` supports CSV, TXT, Excel, RDS, and Parquet inputs; document the source file, sheet or table name, extract date, and any parsing assumptions.
+
 Reconcile before fitting:
 
 - row count and grain

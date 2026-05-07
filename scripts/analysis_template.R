@@ -19,7 +19,7 @@ script_dir <- if (!is.na(script_path)) dirname(script_path) else getwd()
 source(file.path(script_dir, "glm_helpers.R"))
 source(file.path(script_dir, "export_workbook.R"))
 
-run_frequency_demo <- function(data, output_dir = "glm_demo_output") {
+run_frequency_validation <- function(data, output_dir = "glm_validation_output") {
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   dir.create(file.path(output_dir, "outputs", "diagnostics"), recursive = TRUE, showWarnings = FALSE)
   dir.create(file.path(output_dir, "outputs", "relativities"), recursive = TRUE, showWarnings = FALSE)
@@ -30,7 +30,7 @@ run_frequency_demo <- function(data, output_dir = "glm_demo_output") {
 
   splits <- split_by_period(
     modeling,
-    period_col = "demo_period",
+    period_col = "accident_period",
     train_end = "2019-12-31",
     valid_end = "2020-09-30"
   )
@@ -63,16 +63,22 @@ run_frequency_demo <- function(data, output_dir = "glm_demo_output") {
   utils::write.csv(relativities, file.path(output_dir, "outputs", "relativities", "frequency_relativity_table.csv"), row.names = FALSE)
   write_session_info(file.path(output_dir, "artifacts", "session_info.txt"))
 
-  export_glm_workbook(
-    file.path(output_dir, "outputs", "glm_outputs.xlsx"),
-    inputs = data.frame(field = c("target", "exposure", "source"), value = c("ClaimNb", "Exposure", "freMTPL2 demo fixture")),
-    data_qa = qa,
-    model_summary = model_summary,
-    diagnostics = calibration,
-    relativities = relativities,
-    validation = performance,
-    change_log = data.frame(date = as.character(Sys.Date()), change = "Initial demo model", rationale = "Smoke test")
-  )
+  workbook_path <- file.path(output_dir, "outputs", "glm_outputs.xlsx")
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+    export_glm_workbook(
+      workbook_path,
+      inputs = data.frame(field = c("target", "exposure", "source"), value = c("ClaimNb", "Exposure", "synthetic validation data")),
+      data_qa = qa,
+      model_summary = model_summary,
+      diagnostics = calibration,
+      relativities = relativities,
+      validation = performance,
+      change_log = data.frame(date = as.character(Sys.Date()), change = "Initial validation model", rationale = "Script check")
+    )
+  } else {
+    message("Package openxlsx is not available; skipped glm_outputs.xlsx export.")
+    workbook_path <- NA_character_
+  }
 
   list(
     model = model,
@@ -80,13 +86,14 @@ run_frequency_demo <- function(data, output_dir = "glm_demo_output") {
     calibration = calibration,
     relativities = relativities,
     leakage = leakage,
-    output_dir = output_dir
+    output_dir = output_dir,
+    workbook_path = workbook_path
   )
 }
 
 if (sys.nframe() == 0 && !interactive()) {
-  source(file.path(script_dir, "load_fremtpl_demo.R"))
-  fixture <- make_fremtpl_fixture(n = 5000)
-  result <- run_frequency_demo(fixture)
-  message("Wrote GLM demo output to: ", normalizePath(result$output_dir, mustWork = FALSE))
+  source(file.path(script_dir, "sample_data.R"))
+  sample_data <- make_sample_frequency_data(n = 5000)
+  result <- run_frequency_validation(sample_data)
+  message("Wrote GLM validation output to: ", normalizePath(result$output_dir, mustWork = FALSE))
 }

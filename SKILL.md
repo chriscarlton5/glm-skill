@@ -11,7 +11,7 @@ Use this skill for P&C pricing GLMs. The supported v1 targets are frequency, sev
 
 Proceed autonomously when the user asks for an end-to-end model. Stop only when a hard gate is missing or contradictory:
 
-- modeling data or a demo-data request
+- modeling data
 - target type
 - exposure basis
 - claim/loss definition
@@ -29,31 +29,31 @@ For non-blocking uncertainty, choose a conservative actuarial default, document 
    - Severity: positive claims only, usually Gamma/log with claim-count weights when justified.
    - Loss cost: aggregate loss per exposure with documented variance treatment.
    - Pure premium: Tweedie/log when one model is needed for zero mass plus positive continuous losses.
-4. Reconcile exposure, claim counts, loss, premium if relevant, and exclusions before fitting.
-5. Screen every candidate predictor for leakage, rating-time availability, sparse levels, regulatory/fairness concerns, and scoring stability.
-6. Split train/validation/test. Use a time-based split for pricing unless the user gives a defensible reason for random splitting.
-7. Fit a baseline before candidate models. Compare candidates using validation performance, calibration, lift, residuals, segment stability, and actuarial reasonableness.
-8. Extract relativities with base levels or exposure-weighted normalization. Preserve grouping maps and new/missing-level scoring rules.
-9. Export documentation and exhibits. Excel is a review artifact only; code and saved maps are the source of truth.
+4. Load user data through a documented, reproducible path. Prefer `load_modeling_data()` from `scripts/glm_helpers.R` for CSV, TXT, Excel, RDS, and Parquet inputs; add explicit parsing code for database extracts or unusual formats.
+5. Reconcile exposure, claim counts, loss, premium if relevant, and exclusions before fitting.
+6. Screen every candidate predictor for leakage, rating-time availability, sparse levels, regulatory/fairness concerns, and scoring stability.
+7. Split train/validation/test. Use a time-based split for pricing unless the user gives a defensible reason for random splitting.
+8. Fit a baseline before candidate models. Compare candidates using validation performance, calibration, lift, residuals, segment stability, and actuarial reasonableness.
+9. Extract relativities with base levels or exposure-weighted normalization. Preserve grouping maps and new/missing-level scoring rules.
+10. Export documentation and exhibits. Excel is a review artifact only; code and saved maps are the source of truth.
 
 ## Bundled Resources
 
 - `scripts/preflight.R`: dependency and environment checks.
-- `scripts/load_fremtpl_demo.R`: CASdatasets-based freMTPL loader and deterministic demo fixture builder. Do not bundle full freMTPL data in this skill.
-- `scripts/glm_helpers.R`: QA, split, grouping, diagnostics, relativity, and session helpers.
-- `scripts/analysis_template.R`: runnable frequency demo and template for user data.
+- `scripts/sample_data.R`: synthetic validation data used by smoke tests.
+- `scripts/glm_helpers.R`: data loading, QA, split, grouping, diagnostics, relativity, and session helpers.
+- `scripts/analysis_template.R`: runnable frequency workflow template.
 - `scripts/export_workbook.R`: `openxlsx` workbook export helpers.
-- `scripts/smoke_test.R`: freMTPL/demo fixture smoke test.
+- `scripts/smoke_test.R`: end-to-end script check.
 - `assets/templates/model_report.qmd`: report scaffold.
 - `assets/templates/data_dictionary.md`: field inventory scaffold.
 - `assets/templates/assumptions.yml`: assumptions scaffold.
 - `references/pricing_workflow.md`: detailed workflow and correct/wrong GLM patterns.
 - `references/diagnostics.md`: diagnostics definitions and minimum exhibits.
 - `references/regulatory_fairness.md`: practical regulatory and fairness screening checklist.
-- `references/fremtpl_demo.md`: freMTPL source, demo behavior, and limitations.
 - `references/output_contract.md`: expected output files and workbook tabs.
 
-Read only the reference files needed for the task. Start with `references/pricing_workflow.md` for modeling work, `references/fremtpl_demo.md` for demos, and `references/regulatory_fairness.md` before final variable selection.
+Read only the reference files needed for the task. Start with `references/pricing_workflow.md` for modeling work and `references/regulatory_fairness.md` before final variable selection.
 
 ## Non-Negotiable Checks
 
@@ -63,10 +63,6 @@ Read only the reference files needed for the task. Start with `references/pricin
 - Never deliver relativities without base levels, normalization basis, grouping maps, and scoring treatment for new/missing levels.
 - Never make spreadsheet-only transformations that are absent from code.
 - Save package/session information with every final deliverable.
-
-## freMTPL Demo
-
-Use freMTPL only through `scripts/load_fremtpl_demo.R`. Prefer `CASdatasets` as the canonical R source. If `CASdatasets` is missing, report the missing optional package and give the install command; do not silently switch to Kaggle, Hugging Face, or OpenML. The loader creates a small deterministic fixture for smoke tests and demos so the skill stays fast and lightweight.
 
 ## Delivery Checklist
 

@@ -56,6 +56,24 @@ At minimum, provide:
 
 If important details are missing, Codex should stop and ask for them. If a detail is non-blocking, Codex should make a conservative assumption and document it.
 
+## Supported Data Files
+
+The bundled helper `load_modeling_data()` supports common starting formats:
+
+- CSV or TXT through base R
+- Excel workbooks through `openxlsx`
+- RDS files through base R
+- Parquet files through optional `arrow`
+
+Example:
+
+```r
+source("scripts/glm_helpers.R")
+modeling_data <- load_modeling_data("data/my_modeling_file.xlsx", sheet = "modeling")
+```
+
+The data still needs a defined modeling grain, target, exposure field, time basis, and predictor list. The skill is designed to help Codex inspect and clean imperfect data, but it cannot infer claim definitions, exposure units, or pricing restrictions with confidence unless those are provided or documented.
+
 ## Skill Guardrails
 
 The skill instructs Codex to follow these actuarial modeling rules:
@@ -97,8 +115,8 @@ Required R packages:
 
 ```r
 c(
-  "dplyr", "readr", "lubridate", "broom", "ggplot2",
-  "openxlsx", "MASS", "mgcv", "statmod"
+  "dplyr", "lubridate", "broom", "ggplot2",
+  "MASS", "mgcv", "statmod"
 )
 ```
 
@@ -106,12 +124,21 @@ Install the required packages:
 
 ```r
 install.packages(
-  c("dplyr", "readr", "lubridate", "broom", "ggplot2", "openxlsx", "statmod"),
+  c("dplyr", "lubridate", "broom", "ggplot2", "statmod"),
   repos = "https://cloud.r-project.org"
 )
 ```
 
 `MASS` and `mgcv` are usually included with R distributions, but the preflight script will report if they are missing.
+
+Optional packages:
+
+- `openxlsx` for Excel input and workbook exhibits
+- `arrow` for Parquet input
+- `tweedie` for some advanced pure premium workflows
+- `rsample` and `yardstick` if you want tidymodels-style splitting and metrics
+- `duckdb` for larger local extracts
+- `quarto` to render `.qmd` model reports
 
 ## Check Your Setup
 
@@ -135,24 +162,9 @@ Expected result:
 All required R packages are installed.
 ```
 
-## Optional Setup Check
+## Verify The Skill Works
 
-The repo includes an optional setup check for users who want to verify that the bundled scripts can run end-to-end without using private data.
-
-This demo uses a public actuarial dataset loaded through the optional `CASdatasets` R package. You do not need this demo dataset to use the skill on your own data.
-
-To install the optional demo dependency:
-
-```r
-install.packages(c("xts", "zoo"), repos = "https://cloud.r-project.org")
-install.packages(
-  "CASdatasets",
-  repos = "https://dutangc.perso.math.cnrs.fr/RRepository/pub/",
-  type = "source"
-)
-```
-
-Run the setup check:
+Run the smoke test to confirm the bundled R helpers can fit a small GLM, create diagnostics, export workbook exhibits, and save session information:
 
 ```powershell
 Rscript scripts\smoke_test.R
@@ -172,11 +184,11 @@ glm-skill/
   agents/openai.yaml               Skill display metadata
   scripts/
     preflight.R                    R/package environment checks
-    load_fremtpl_demo.R            Optional public demo loader
-    glm_helpers.R                  QA, split, scoring, diagnostics, and relativity helpers
-    analysis_template.R            Runnable modeling template
+    sample_data.R                  Synthetic validation data for smoke tests
+    glm_helpers.R                  Data loading, QA, split, scoring, diagnostics, and relativity helpers
+    analysis_template.R            Runnable frequency workflow template
     export_workbook.R              Excel workbook export helper
-    smoke_test.R                   Optional end-to-end demo check
+    smoke_test.R                   End-to-end script check
   assets/templates/
     assumptions.yml                Assumptions scaffold
     data_dictionary.md             Field inventory scaffold
@@ -185,7 +197,6 @@ glm-skill/
     pricing_workflow.md            Detailed actuarial workflow and correct/wrong patterns
     diagnostics.md                 Diagnostic exhibits and formulas
     regulatory_fairness.md         Practical regulatory/fairness screening checklist
-    fremtpl_demo.md                Optional demo source and limitations
     output_contract.md             Expected files and workbook tabs
 ```
 

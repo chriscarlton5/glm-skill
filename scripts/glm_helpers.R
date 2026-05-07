@@ -10,6 +10,41 @@ check_required_columns <- function(data, columns) {
   invisible(TRUE)
 }
 
+load_modeling_data <- function(path, sheet = NULL, ...) {
+  if (!file.exists(path)) {
+    stop("Data file does not exist: ", path, call. = FALSE)
+  }
+
+  ext <- tolower(tools::file_ext(path))
+  if (ext %in% c("csv", "txt")) {
+    return(utils::read.csv(path, stringsAsFactors = FALSE, ...))
+  }
+  if (ext %in% c("xlsx", "xlsm", "xls")) {
+    if (!requireNamespace("openxlsx", quietly = TRUE)) {
+      stop("Package openxlsx is required to read Excel files.", call. = FALSE)
+    }
+    if (is.null(sheet)) {
+      sheet <- openxlsx::getSheetNames(path)[1]
+    }
+    return(openxlsx::read.xlsx(path, sheet = sheet, ...))
+  }
+  if (ext == "rds") {
+    return(readRDS(path))
+  }
+  if (ext == "parquet") {
+    if (!requireNamespace("arrow", quietly = TRUE)) {
+      stop("Optional package arrow is required to read Parquet files.", call. = FALSE)
+    }
+    return(arrow::read_parquet(path, ...))
+  }
+
+  stop(
+    "Unsupported data file extension: .", ext,
+    ". Supported formats: csv, txt, xlsx, xlsm, xls, rds, parquet.",
+    call. = FALSE
+  )
+}
+
 validate_exposure <- function(data, exposure_col = "Exposure") {
   check_required_columns(data, exposure_col)
   exposure <- data[[exposure_col]]
