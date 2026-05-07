@@ -1,207 +1,34 @@
 # Actuarial GLM Model Skill
 
-`actuarial-glm-model` is a Codex skill for building reproducible actuarial Generalized Linear Models for P&C pricing. It is designed for frequency, severity, loss cost, and Tweedie pure premium workflows, with R-first scripts, actuarial guardrails, diagnostics, relativities, documentation templates, and optional Excel review exhibits.
+`actuarial-glm-model` is a Codex skill for building reproducible P&C pricing GLMs. It helps Codex create R-based modeling workflows for frequency, severity, loss cost, and pure premium work, including exposure treatment, diagnostics, relativities, documentation, and optional Excel exhibits.
 
-The skill is intentionally not just a checklist. It includes reusable R scripts and templates so a new Codex agent can run a preflight, use the freMTPL demo path, fit a baseline frequency GLM, generate diagnostics, export relativities, and produce workbook artifacts.
+This skill is for users who want Codex to help build an actuarial pricing model from their own data.
 
-## What This Skill Does
+## What You Can Ask Codex To Do
 
-- Builds P&C pricing GLMs with correct target and exposure treatment.
-- Enforces frequency model exposure offsets such as `offset(log(exposure))`.
-- Supports frequency, severity, loss cost, and Tweedie pure premium modeling patterns.
-- Screens predictors for leakage, rating-time availability, sparse levels, scoring stability, and regulatory/fairness concerns.
-- Produces reproducible R workflows with saved preprocessing maps and session information.
-- Generates model diagnostics, calibration/lift exhibits, relativity tables, and optional Excel workbooks.
-- Provides a freMTPL smoke-test/demo path without bundling the full dataset into the skill.
-
-## Repository Structure
+Examples:
 
 ```text
-glm-skill/
-  SKILL.md                         Codex-facing skill instructions
-  agents/openai.yaml               Skill display metadata
-  scripts/
-    preflight.R                    R/package environment checks
-    load_fremtpl_demo.R            freMTPL loader and deterministic fixture builder
-    glm_helpers.R                  QA, split, scoring, diagnostics, and relativity helpers
-    analysis_template.R            Runnable demo/modeling template
-    export_workbook.R              Excel workbook export helper
-    smoke_test.R                   End-to-end freMTPL demo smoke test
-  assets/templates/
-    assumptions.yml                Assumptions scaffold
-    data_dictionary.md             Field inventory scaffold
-    model_report.qmd               Report scaffold
-  references/
-    pricing_workflow.md            Detailed actuarial workflow and correct/wrong patterns
-    diagnostics.md                 Diagnostic exhibits and formulas
-    regulatory_fairness.md         Practical regulatory/fairness screening checklist
-    fremtpl_demo.md                freMTPL source and demo limitations
-    output_contract.md             Expected files and workbook tabs
+Use the actuarial GLM skill to build a frequency model from this policy and claims extract.
 ```
-
-## Installation
-
-Place this folder where Codex can discover local skills. The required skill entrypoint is exact-case `SKILL.md`.
-
-For a standard Codex skills directory:
-
-```powershell
-Copy-Item -Recurse C:\path\to\glm-skill C:\Users\<you>\.codex\skills\actuarial-glm-model
-```
-
-This repo already contains the expected skill metadata:
-
-- `SKILL.md`
-- `agents/openai.yaml`
-- bundled scripts, templates, and references
-
-## R Requirements
-
-R is the default modeling stack. The scripts have been tested with:
 
 ```text
-R 4.5.3
+Create a severity GLM with diagnostics, selected relativities, and a model report.
 ```
-
-Required R packages:
-
-```r
-c(
-  "dplyr", "readr", "lubridate", "broom", "ggplot2",
-  "openxlsx", "MASS", "mgcv", "statmod"
-)
-```
-
-Optional packages:
-
-```r
-c(
-  "CASdatasets", "tweedie", "rsample", "yardstick",
-  "arrow", "duckdb", "quarto"
-)
-```
-
-`CASdatasets` is required for the freMTPL demo/smoke test. It is not hosted on CRAN because of package size, so install it from an official CASdatasets repository.
-
-Install core packages from CRAN:
-
-```r
-install.packages(
-  c("dplyr", "readr", "lubridate", "broom", "ggplot2", "openxlsx", "statmod"),
-  repos = "https://cloud.r-project.org"
-)
-```
-
-Install CASdatasets:
-
-```r
-install.packages(c("xts", "zoo"), repos = "https://cloud.r-project.org")
-install.packages(
-  "CASdatasets",
-  repos = "https://dutangc.perso.math.cnrs.fr/RRepository/pub/",
-  type = "source"
-)
-```
-
-## Windows Rscript Note
-
-On some Windows machines, `Rscript` is installed but not on `PATH`. If this fails:
-
-```powershell
-Rscript scripts\preflight.R
-```
-
-use the full executable path:
-
-```powershell
-& 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\preflight.R
-```
-
-Adjust the version folder as needed.
-
-## Quick Validation
-
-Run the preflight:
-
-```powershell
-& 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\preflight.R
-```
-
-Expected result after installing required packages:
 
 ```text
-All required R packages are installed.
+Review this pricing dataset for leakage and build a reproducible loss cost model.
 ```
-
-Run the full freMTPL smoke test:
-
-```powershell
-& 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\smoke_test.R
-```
-
-Expected result:
 
 ```text
-GLM skill smoke test passed: <temp path>/glm_skill_smoke_test
+Build a pure premium GLM and export review exhibits to Excel.
 ```
 
-The smoke test verifies these artifacts:
+Codex should produce reproducible code and documentation, not just a one-time answer.
 
-- `outputs/diagnostics/performance.csv`
-- `outputs/diagnostics/calibration_decile.csv`
-- `outputs/relativities/frequency_relativity_table.csv`
-- `outputs/glm_outputs.xlsx`
-- `artifacts/preprocessing_maps/area_map.csv`
-- `artifacts/session_info.txt`
+## What The Skill Produces
 
-## freMTPL Demo Behavior
-
-The skill uses freMTPL only through `scripts/load_fremtpl_demo.R`.
-
-Important design choices:
-
-- The full freMTPL dataset is not bundled in this repo.
-- The canonical source is the `CASdatasets` R package.
-- The loader uses `freMTPL2freq` for frequency demos.
-- A small deterministic fixture is created at runtime for smoke tests.
-- If `CASdatasets` is unavailable, the script stops with a clear optional dependency message rather than silently switching to another source.
-
-This keeps the skill lightweight while preserving reproducibility and actuarial familiarity.
-
-## Running the Demo Template
-
-To run the demo modeling path directly:
-
-```powershell
-& 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\analysis_template.R
-```
-
-By default, this writes demo output to:
-
-```text
-glm_demo_output/
-```
-
-Generated model artifacts are ignored by git through `.gitignore`.
-
-## Expected Modeling Workflow
-
-The skill instructs Codex to:
-
-1. Run `scripts/preflight.R`.
-2. Define target, exposure, claim/loss definition, and time basis.
-3. Reconcile exposure, claim count, loss, and premium where relevant.
-4. Screen predictors for leakage and availability at rating time.
-5. Split train/validation/test, using time-based splits by default.
-6. Fit a baseline model before candidates.
-7. Generate diagnostics before selecting a model.
-8. Extract relativities with base levels and normalization.
-9. Save preprocessing maps and session information.
-10. Produce report/workbook outputs aligned to the selected model.
-
-## Output Contract
-
-A full modeling run should produce:
+A full run should create some or all of these artifacts, depending on the request and available data:
 
 ```text
 analysis.R or model.qmd
@@ -214,67 +41,110 @@ artifacts/preprocessing_maps/
 artifacts/session_info.txt
 ```
 
-Workbook tabs, when Excel output is requested:
+The exact outputs may be narrower if you ask for a targeted task, such as only a data QA review or only a baseline model.
 
-- Inputs
-- Data QA
-- Model Summary
-- Diagnostics
-- Relativities
-- Validation
-- Change Log
+## What Data You Need
 
-## Actuarial Guardrails
+At minimum, provide:
 
-The skill treats these as non-negotiable:
+- A modeling dataset, such as policy, exposure, claim, premium, or aggregated cell data.
+- The modeling target: frequency, severity, loss cost, or pure premium.
+- An exposure basis, such as earned car-years, policy-years, payroll, sales, insured value, or another denominator.
+- Claim and loss definitions, including claim count, paid/incurred basis, caps, trend, development, CAT handling, and LAE treatment where relevant.
+- A time basis, such as policy period, accident period, accounting period, or effective period.
+- Candidate predictors and any restrictions on which variables may be used for pricing.
 
-- Claim count models require an exposure offset or equivalent exposure treatment.
-- Severity models use positive claims only.
-- Leakage fields are excluded from frequency predictors.
-- Grouping, capping, and splines are tuned only on training/validation data, not final test.
-- Relativities include base levels, normalization, and scoring treatment for new/missing levels.
-- Spreadsheet outputs are review exhibits, not the source of truth.
-- Session/package information is saved with final artifacts.
+If important details are missing, Codex should stop and ask for them. If a detail is non-blocking, Codex should make a conservative assumption and document it.
 
-## Regulatory and Fairness Review
+## Skill Guardrails
 
-The skill includes `references/regulatory_fairness.md` for practical screening of variable eligibility, protected/proxy risk, jurisdictional restrictions, consumer explainability, adverse impact concerns, filing support, and monitoring.
+The skill instructs Codex to follow these actuarial modeling rules:
 
-This skill does not provide legal or regulatory advice. The final model report should document assumptions and recommend jurisdiction-specific review when variable eligibility or filing support is material.
+- Frequency models must use exposure offsets or an equivalent exposure treatment.
+- Severity models should use positive claims only.
+- Future, post-outcome, claim handling, paid/incurred, recovery, salvage, close-date, adjuster, and litigation fields must not be used as frequency predictors.
+- Train, validation, and test separation must be preserved.
+- Sparse categorical levels must be grouped with documented mapping rules.
+- Relativities must include base levels or normalization basis.
+- Manual overrides and judgment selections must be documented.
+- Excel outputs are review exhibits; reproducible code remains the source of truth.
 
-## Validation Performed
+## Installation
 
-The current implementation has been validated as follows:
+Place this folder where Codex can discover local skills. The required entrypoint is exact-case `SKILL.md`.
 
-- Official Codex skill validation passes.
-- All R scripts parse successfully.
-- R preflight passes after installing required packages.
-- freMTPL smoke test passes end-to-end.
-- A fresh forward-test agent independently ran the skill and confirmed the demo path works, with the only caveat that `Rscript` may need a full Windows path.
+For a standard Codex skills directory:
 
-## Development Notes
+```powershell
+Copy-Item -Recurse C:\path\to\glm-skill C:\Users\<you>\.codex\skills\actuarial-glm-model
+```
 
-- Keep `SKILL.md` concise because it is loaded into Codex context.
-- Put detailed guidance in `references/`.
-- Put deterministic, repeated procedures in `scripts/`.
-- Do not commit full freMTPL data or generated model outputs.
-- Do not add `renv.lock` in v1; use preflight checks and explicit dependency installation instead.
+The skill package includes:
 
-## Common Troubleshooting
+```text
+SKILL.md
+agents/openai.yaml
+scripts/
+assets/templates/
+references/
+```
 
-### `Rscript` is not recognized
+## R Setup
 
-Use the full path to `Rscript.exe`, for example:
+R is the default modeling stack.
+
+Required R packages:
+
+```r
+c(
+  "dplyr", "readr", "lubridate", "broom", "ggplot2",
+  "openxlsx", "MASS", "mgcv", "statmod"
+)
+```
+
+Install the required packages:
+
+```r
+install.packages(
+  c("dplyr", "readr", "lubridate", "broom", "ggplot2", "openxlsx", "statmod"),
+  repos = "https://cloud.r-project.org"
+)
+```
+
+`MASS` and `mgcv` are usually included with R distributions, but the preflight script will report if they are missing.
+
+## Check Your Setup
+
+Run the preflight script before using the skill for a real model:
+
+```powershell
+Rscript scripts\preflight.R
+```
+
+On Windows, if `Rscript` is not on `PATH`, use the full path instead:
 
 ```powershell
 & 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\preflight.R
 ```
 
-### `CASdatasets` is not available on CRAN
+Adjust the R version folder as needed.
 
-Install it from the official CASdatasets repository:
+Expected result:
+
+```text
+All required R packages are installed.
+```
+
+## Optional Setup Check
+
+The repo includes an optional setup check for users who want to verify that the bundled scripts can run end-to-end without using private data.
+
+This demo uses a public actuarial dataset loaded through the optional `CASdatasets` R package. You do not need this demo dataset to use the skill on your own data.
+
+To install the optional demo dependency:
 
 ```r
+install.packages(c("xts", "zoo"), repos = "https://cloud.r-project.org")
 install.packages(
   "CASdatasets",
   repos = "https://dutangc.perso.math.cnrs.fr/RRepository/pub/",
@@ -282,15 +152,71 @@ install.packages(
 )
 ```
 
-### Smoke test fails during preflight
-
-Install missing required packages, then rerun:
+Run the setup check:
 
 ```powershell
-& 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\preflight.R
+Rscript scripts\smoke_test.R
+```
+
+Or on Windows with a full R path:
+
+```powershell
 & 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\smoke_test.R
 ```
 
-### Generated outputs appear in the repo
+## Repository Structure
 
-They should be ignored by `.gitignore`. Remove generated folders such as `glm_demo_output/`, `outputs/`, and `artifacts/` before committing if they were created manually.
+```text
+glm-skill/
+  SKILL.md                         Codex-facing skill instructions
+  agents/openai.yaml               Skill display metadata
+  scripts/
+    preflight.R                    R/package environment checks
+    load_fremtpl_demo.R            Optional public demo loader
+    glm_helpers.R                  QA, split, scoring, diagnostics, and relativity helpers
+    analysis_template.R            Runnable modeling template
+    export_workbook.R              Excel workbook export helper
+    smoke_test.R                   Optional end-to-end demo check
+  assets/templates/
+    assumptions.yml                Assumptions scaffold
+    data_dictionary.md             Field inventory scaffold
+    model_report.qmd               Report scaffold
+  references/
+    pricing_workflow.md            Detailed actuarial workflow and correct/wrong patterns
+    diagnostics.md                 Diagnostic exhibits and formulas
+    regulatory_fairness.md         Practical regulatory/fairness screening checklist
+    fremtpl_demo.md                Optional demo source and limitations
+    output_contract.md             Expected files and workbook tabs
+```
+
+## Regulatory And Fairness Note
+
+The skill includes a practical screening checklist for protected/proxy variables, jurisdictional restrictions, consumer explainability, adverse impact concerns, filing support, and monitoring.
+
+This skill does not provide legal or regulatory advice. Pricing variable eligibility and filing requirements should be reviewed for the relevant jurisdiction, line of business, and company policy.
+
+## Troubleshooting
+
+### `Rscript` is not recognized
+
+Use the full path to `Rscript.exe`:
+
+```powershell
+& 'C:\Program Files\R\R-4.5.3\bin\Rscript.exe' scripts\preflight.R
+```
+
+### Preflight reports missing packages
+
+Install the missing packages, then rerun:
+
+```powershell
+Rscript scripts\preflight.R
+```
+
+### Codex asks for more information
+
+That is expected when required modeling inputs are missing. The most common blockers are target definition, exposure basis, claim/loss definition, time basis, and variable restrictions.
+
+### Generated files appear in the repo
+
+Generated model outputs should not be committed. The `.gitignore` excludes common output folders and generated workbook/data files.
