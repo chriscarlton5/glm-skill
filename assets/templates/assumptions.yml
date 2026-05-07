@@ -1,0 +1,26 @@
+model:
+  purpose: frequency
+  target: claim_count
+  exposure: exposure
+  family: poisson
+  link: log
+  offset: log(exposure)
+data:
+  source: ""
+  extract_date: ""
+  grain: ""
+  experience_period: ""
+  claim_definition: ""
+  loss_definition: ""
+  premium_basis: ""
+split:
+  method: time-based
+  train: ""
+  validation: ""
+  test: ""
+assumptions:
+  exclusions: []
+  caps: []
+  categorical_grouping: []
+  regulatory_constraints: []
+  manual_overrides: []

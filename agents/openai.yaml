@@ -1,0 +1,3 @@
+display_name: Actuarial GLM Model
+short_description: Build reproducible P&C pricing GLMs with diagnostics, relativities, and documentation.
+default_prompt: Build an actuarial pricing GLM using the provided data or the freMTPL demo, then produce reproducible R code, diagnostics, relativities, and review artifacts.

@@ -1,0 +1,32 @@
+---
+title: "Actuarial GLM Model Report"
+format: html
+---
+
+# Executive Summary
+
+Describe model purpose, target, selected model, key variables, validation performance, major judgments, and limitations.
+
+# Data and Methodology
+
+Document data source, extract date, grain, experience period, exposure basis, claim/loss definition, exclusions, transformations, and split.
+
+# Model Specification
+
+Document family/link, offset or weights, selected predictors, candidate models considered, and rationale for the selected model.
+
+# Diagnostics
+
+Include performance table, lift, calibration, actual versus expected, residual review, overdispersion, and segment stability.
+
+# Relativities
+
+Include raw modeled relativities, selected relativities, base levels or normalization, credibility adjustments, and manual overrides.
+
+# Regulatory and Fairness Review
+
+Document variable eligibility assumptions, jurisdictional caveats, proxy concerns, and recommended review.
+
+# Limitations and Monitoring
+
+Document data limitations, operational scoring concerns, monitoring metrics, and refresh recommendations.
