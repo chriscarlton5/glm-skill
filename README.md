@@ -4,6 +4,8 @@
 
 This skill is for users who want Codex to help build an actuarial pricing model from their own data.
 
+The skill supports both expert-directed and guided-discovery workflows. If you already know the target, family, link, and exposure treatment, Codex should validate and document those choices. If you only know the business goal, Codex should inspect the data, ask for material business decisions, and recommend a valid GLM structure.
+
 ## What You Can Ask Codex To Do
 
 Examples:
@@ -55,6 +57,8 @@ At minimum, provide:
 - Candidate predictors and any restrictions on which variables may be used for pricing.
 
 If important details are missing, Codex should stop and ask for them. If a detail is non-blocking, Codex should make a conservative assumption and document it.
+
+Business decisions usually need user confirmation: model purpose, target definition, exposure basis, claim/loss definition, time basis, coverage scope, one-part versus two-part deliverable, and variable or regulatory restrictions. Technical choices such as Poisson versus negative binomial for counts, Gamma versus inverse Gaussian for positive severity, or Tweedie versus two-part pure premium should be reasoned over from target shape and validation diagnostics.
 
 ## Supported Data Files
 
@@ -140,6 +144,48 @@ Optional packages:
 - `duckdb` for larger local extracts
 - `quarto` to render `.qmd` model reports
 
+Install the optional packages used for richer file handling, reports, and candidate model workflows:
+
+```r
+install.packages(
+  c("openxlsx", "arrow", "tweedie", "rsample", "yardstick", "duckdb", "quarto"),
+  repos = "https://cloud.r-project.org"
+)
+```
+
+On Windows, if the site library under `C:\Program Files\R\...\library` is not writable, install to a user library:
+
+```r
+user_lib <- file.path(Sys.getenv("USERPROFILE"), "R", "win-library", paste(R.version$major, R.version$minor, sep = "."))
+dir.create(user_lib, recursive = TRUE, showWarnings = FALSE)
+.libPaths(c(user_lib, .libPaths()))
+install.packages(
+  c("dplyr", "lubridate", "broom", "ggplot2", "statmod"),
+  lib = user_lib,
+  repos = "https://cloud.r-project.org"
+)
+```
+
+If package installation is blocked by network, proxy, sandbox, certificate, or repository permissions, document the blocker, run `scripts/preflight.R`, and continue only with packages already available. Do not silently switch modeling stacks. Use the Python fallback below only when R setup is unavailable and the fallback is appropriate for the target.
+
+## Python Fallback For One-Part Pure Premium
+
+R remains the default modeling stack. When R is unavailable and the task is a one-part pure premium fallback, Python can use scikit-learn's Tweedie GLM pattern:
+
+```python
+from sklearn.linear_model import TweedieRegressor
+
+loss = data["loss"]
+exposure = data["exposure"]
+y = loss / exposure
+sample_weight = exposure
+
+model = TweedieRegressor(power=1.5, link="log")
+model.fit(X, y, sample_weight=sample_weight)
+```
+
+Treat this as a fallback, not the preferred production workflow. Confirm that `loss` and `exposure` definitions are documented, exposure is positive, and validation reports actual versus predicted aggregate loss and pure premium.
+
 ## Check Your Setup
 
 Run the preflight script before using the skill for a real model:
@@ -223,6 +269,8 @@ Install the missing packages, then rerun:
 ```powershell
 Rscript scripts\preflight.R
 ```
+
+If installation fails because the default R library is not writable, use a Windows user library with `.libPaths()` as shown in the R setup section. If installation fails because network, proxy, sandbox, certificate, or repository access is blocked, document the blocker and continue only with installed packages or an explicitly accepted fallback.
 
 ### Codex asks for more information
 

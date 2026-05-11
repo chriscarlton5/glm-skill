@@ -7,17 +7,25 @@ format: html
 
 Describe model purpose, target, selected model, key variables, validation performance, major judgments, and limitations.
 
-# Data and Methodology
+# Data Reconciliation and Methodology
 
-Document data source, extract date, grain, experience period, exposure basis, claim/loss definition, exclusions, transformations, and split.
+Document data source, extract date, grain, experience period, exposure basis, claim/loss definition, premium basis where relevant, exclusions, transformations, and reconciliation of exposure, claim count, loss, and premium.
+
+# Target and Family Selection
+
+Document user direction mode, locked expert choices, inferred choices, target unit, one-part versus two-part deliverable, candidate families considered, rejected families, selected family/link, offset or weights, diagnostics used, and selection rationale.
+
+# Split Rationale
+
+Document train/validation/test split method, period boundaries or random seed, and why the split is appropriate for pricing.
 
 # Model Specification
 
-Document family/link, offset or weights, selected predictors, candidate models considered, and rationale for the selected model.
+Document family/link, offset or weights, selected predictors, candidate models considered, rejected candidates, and rationale for the selected model.
 
 # Diagnostics
 
-Include performance table, lift, calibration, actual versus expected, residual review, overdispersion, and segment stability.
+Include performance table, lift, calibration, actual versus expected, actual versus predicted aggregate loss where applicable, actual versus predicted pure premium where applicable, finite RMSE/MAE or equivalent error metrics, residual review, overdispersion for count models, exploding prediction checks, and segment stability.
 
 # Relativities
 
@@ -30,3 +38,7 @@ Document variable eligibility assumptions, jurisdictional caveats, proxy concern
 # Limitations and Monitoring
 
 Document data limitations, operational scoring concerns, monitoring metrics, and refresh recommendations.
+
+# Internal Run Notes
+
+Document skill usability notes, implementation caveats, package/setup issues, and follow-up work. Omit this section from client-facing actuarial reports unless requested.

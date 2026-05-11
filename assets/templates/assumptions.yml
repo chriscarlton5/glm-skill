@@ -1,10 +1,23 @@
 model:
+  user_direction_mode: guided-discovery
   purpose: frequency
+  objective: ""
   target: claim_count
+  target_unit: count
   exposure: exposure
   family: poisson
   link: log
   offset: log(exposure)
+  weights: ""
+  deliverable_structure: one-part
+  user_specified_locked_choices: []
+  inferred_choices: []
+  candidate_families_considered:
+    - poisson
+  rejected_families: []
+  selection_rationale: ""
+  diagnostics_used: []
+  limitations: []
 data:
   source: ""
   extract_date: ""
@@ -21,6 +34,10 @@ split:
 assumptions:
   exclusions: []
   caps: []
+  bins: []
+  transformations: []
+  categorical_training_levels: []
   categorical_grouping: []
+  new_missing_level_treatment: ""
   regulatory_constraints: []
   manual_overrides: []

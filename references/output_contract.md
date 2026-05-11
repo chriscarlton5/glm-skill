@@ -12,6 +12,7 @@ Create these unless the user requests a narrower deliverable:
 - `outputs/relativities/`
 - `artifacts/preprocessing_maps/`
 - `artifacts/session_info.txt`
+- `artifacts/model_decision_record.yml` or equivalent content in `assumptions.yml`
 
 ## Workbook Tabs
 
@@ -30,11 +31,14 @@ Use blue font for assumptions/manual selections, black for calculated output, an
 ## Minimum Report Sections
 
 - Executive summary
-- Data and methodology
+- Data reconciliation and methodology
 - Target and exposure definition
+- Target/family selection rationale
+- Split rationale
 - Exclusions and transformations
-- Candidate models and selected model
+- Candidate models, rejected families, and selected model
 - Diagnostics and validation
 - Relativities and selected factors
 - Regulatory/fairness notes
 - Limitations and monitoring
+- Internal run/usability notes when the deliverable is for skill evaluation rather than client-facing actuarial review
